@@ -1,8 +1,14 @@
 # pi sessions
 
 ## Location
-`~/.pi/agent/sessions/`
-Filenames look like `<timestamp>_<uuid>.jsonl` (some are just `<uuid>.jsonl`).
+`~/.pi/agent/sessions/` — sessions are **grouped into one subdirectory per project**,
+named after the slugified working directory, not stored flat. The real layout is:
+`~/.pi/agent/sessions/<project-slug>/<timestamp>_<uuid>.jsonl`
+(e.g. `~/.pi/agent/sessions/--Users-USER-ComparIA--/2026-04-29T15-34-56-687Z_<uuid>.jsonl`).
+Verified against a real install. Filenames are `<ISO-timestamp>Z_<uuid>.jsonl`.
+
+Recurse to find the latest, e.g.
+`find ~/.pi/agent/sessions -name '*.jsonl' -print0 | xargs -0 ls -t | head -1`.
 
 One JSONL file per session. Pick the most recently modified unless the user names one.
 

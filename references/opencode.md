@@ -1,22 +1,25 @@
 # opencode sessions
 
 ## The difference
-Unlike the other agents, opencode does **not** store a session as one file. Its storage tree (`~/.local/share/opencode/storage/`) splits a session across `session/`, `message/`, and `part/` directories. Do not try to read those by hand.
+Unlike the other agents, opencode does **not** store a session as one file. Its storage tree (`~/.local/share/opencode/storage/`) splits a session across `message/`, `part/`, `project/`, and `session_diff/` directories (the exact subdirs vary by version — on 1.1.x there is no top-level `session/` dir). Do not try to read those by hand.
 
 ## Use the export command instead
-opencode can export one session as a single JSON document:
+opencode can export one session as a single JSON document.
 
 ```bash
-# find the session id
+# find the session id (the --format json output includes id, title, directory)
 opencode session list --format json
+# session ids look like "ses_414f42d4effeu7crLsmVPtJhZd"
 
-# export it — ALWAYS use -o, never shell redirection (">")
-opencode export <sessionID> --format json -o /tmp/donate-trace/opencode-session.json
+# export it (see the version note below for which form your CLI supports)
+opencode export <sessionID> > /tmp/donate-trace/opencode-session.json
 ```
 
-Two known issues to handle:
-1. **Never use `>` redirection.** A historical bug prepends a status line that breaks the JSON. Always use `-o`/`--output`.
-2. **Version drift.** Older opencode versions emit pre-1.4 field shapes. After export, validate it parses as JSON before doing anything. If it won't parse, tell the user and stop.
+**CLI changed between versions — check what your `opencode export --help` accepts:**
+- **Current opencode (verified on 1.1.4):** `export` takes only `[sessionID]`. There is **no `-o`/`--output` and no `--format` flag** — those are silently ignored and no file is written. You **must** capture stdout with `>` (or `opencode export <id> -o file` will produce nothing). On this version stdout is **clean** valid JSON (first byte `{`, last `}`) — the historical status-line-prepend bug is gone.
+- **Older opencode:** some builds supported `--format json -o <file>` and/or prepended a status line to stdout. If your `export --help` shows `-o`/`--output`, prefer it.
+
+**Always validate after export, on every version:** run the result through a JSON parser (`python3 -c "import json,sys;json.load(open(sys.argv[1]))" <file>`). If it won't parse — e.g. a leading status line from an old build — strip the offending line or tell the user and stop. Never scrub or donate a file that doesn't parse.
 
 ## Format
 `opencode export` produces opencode's own JSON document (a single object, not JSONL) containing the message history and metadata. The scrubber handles single-document JSON as well as JSONL.

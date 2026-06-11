@@ -1,8 +1,13 @@
 # Codex sessions
 
 ## Location
-`~/.codex/sessions/` (and `~/.codex/archived_sessions/`)
-Filenames look like `rollout-<timestamp>-<uuid>.jsonl`.
+`~/.codex/sessions/` — but sessions are **sharded into dated subdirectories**, not
+stored flat: `~/.codex/sessions/<YYYY>/<MM>/<DD>/rollout-<timestamp>-<uuid>.jsonl`
+(also check `~/.codex/archived_sessions/`). Verified against a real install with
+the `~/.codex/sessions/2025/11/20/rollout-…jsonl` layout.
+
+Find the latest with a recursive search rather than a flat `ls`, e.g.
+`find ~/.codex/sessions -name 'rollout-*.jsonl' -print0 | xargs -0 ls -t | head -1`.
 
 One JSONL file per session. Pick the most recently modified unless the user names one.
 

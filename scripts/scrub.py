@@ -37,6 +37,17 @@ WIN_PATH = re.compile(r'([A-Za-z]:\\Users\\)([^\\\s"\']+)', re.IGNORECASE)
 
 EMAIL = re.compile(r'\b[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}\b')
 
+# RFC1918 private / internal IPv4 addresses. Not a secret, but it leaks internal
+# network topology (DB hosts, service IPs), so it is redacted like home paths —
+# without causing the server backstop to reject the whole donation. The four-octet
+# shape with a fixed private prefix avoids mangling version numbers like 1.2.3.4.
+PRIVATE_IP = re.compile(
+    r'\b(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}'
+    r'|192\.168\.\d{1,3}\.\d{1,3}'
+    r'|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}'
+    r'|169\.254\.\d{1,3}\.\d{1,3})\b'
+)
+
 # Secrets — each tuple is (name, compiled regex). Keep these conservative
 # enough to avoid mangling ordinary prose but broad enough to catch real keys.
 SECRET_PATTERNS = [
@@ -87,6 +98,12 @@ def redact_string(s, counts):
         counts["email"] += 1
         return "[REDACTED_EMAIL]"
     s = EMAIL.sub(_email, s)
+
+    # Private/internal IPs (redact-only, not treated as a rejectable secret)
+    def _ip(m):
+        counts["private_ip"] += 1
+        return "[REDACTED_IP]"
+    s = PRIVATE_IP.sub(_ip, s)
 
     return s
 
