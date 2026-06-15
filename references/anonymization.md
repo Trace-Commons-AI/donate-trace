@@ -13,6 +13,7 @@ You do not need to redo these. Trust the report it produces.
 The scrubber recognizes patterns; it cannot recognize meaning. Read the cleaned session and look for:
 
 - **Personal names** in prose — prompts, commit messages, code comments, review notes. Replace with `[NAME]`.
+- **Bare usernames / handles**. The scrubber normalizes the username *inside paths* (`/Users/USER/`), but the same handle still appears on its own elsewhere: the owner column of `ls -l` output, `whoami`/`id` output, GitHub or Hugging Face URLs and account names (`github.com/<handle>`, `user: <handle>`), and prose. The scrubber cannot tell an arbitrary word is a username, so catch these by reading. Replace with `USER` (or `[NAME]` in prose).
 - **Company / client / customer names**. Replace with `[COMPANY]`.
 - **Internal hostnames and URLs** (`*.internal`, `*.local`, private IPs, intranet links). Replace with `[INTERNAL_URL]`.
 - **Project codenames and ticket IDs** that identify a specific org (e.g. `JIRA-1234`, internal project names). Replace with `[REF]` if identifying.
