@@ -7,7 +7,7 @@ The dataset lives on the Hugging Face Hub. The cleaned session becomes one file 
 sessions/<harness>/<filename>
 ```
 
-where `<harness>` is one of `claude_code`, `codex`, `pi`, `opencode`. The Hub derives the dataset table automatically from these files — each becomes one row. Both submission paths below produce a pull request, never a direct push, so a maintainer reviews before anything becomes public.
+where `<harness>` is one of `claude_code`, `codex`, `pi`, `opencode`, `cursor`. The Hub derives the dataset table automatically from these files — each becomes one row. Both submission paths below produce a pull request, never a direct push, so a maintainer reviews before anything becomes public.
 
 The dataset is **`trace-commons/agent-traces`** and the anonymous ingestion
 server is **`https://trace-commons-web.hf.space`** (the same Space that serves

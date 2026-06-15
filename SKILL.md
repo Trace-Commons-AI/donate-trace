@@ -39,6 +39,7 @@ Identify which agent (harness) this is and locate the session file. Each agent s
 - **Codex** → `references/codex.md`
 - **pi** → `references/pi.md`
 - **opencode** → `references/opencode.md`
+- **Cursor** → `references/cursor.md`
 
 If you're not sure which agent you're running in, ask the user, or infer it from which session directory exists on disk. Default to the most recently modified session unless the user names a specific one.
 

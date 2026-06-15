@@ -23,6 +23,7 @@ The scrubber recognizes patterns; it cannot recognize meaning. Read the cleaned 
 - Codex: `payload.content[].text`
 - pi: `message.content` (string or block list)
 - opencode: message/part text fields in the exported JSON
+- Cursor: message/prompt text and shell-command/tool-call payloads in the `agent-transcripts/*.jsonl` lines
 
 ## The rule when unsure
 Redact. The dataset is public and permanent. Dropping a bit of signal costs nothing; leaking a name or a key cannot be undone. If a whole session feels too sensitive to clean confidently, tell the user it may not be a good candidate to donate.
