@@ -31,7 +31,13 @@ from collections import Counter
 # --- redaction patterns -----------------------------------------------------
 # Order matters: more specific patterns run before more general ones.
 
-HOME_PATH = re.compile(r'(/(?:Users|home))/([^/\s"\'\\]+)')
+HOME_PATH = re.compile(r'(\\?/(?:Users|home))\\?/([^/\\\s"\']+)')
+# Dash-encoded home paths. Coding agents (e.g. Claude Code) name their project
+# directories by replacing the slashes of an absolute path with dashes, so
+# /Users/<name>/proj becomes the slug .claude/projects/-Users-<name>-proj. The
+# slash-based HOME_PATH never sees these, so the username leaks. Anchored on the
+# leading "/-Users-" / "/-home-" of the slug to avoid mangling hyphenated prose.
+HOME_PATH_DASH = re.compile(r'(/-(?:Users|home))-([^-\s"\'\\/]+)')
 # Windows user paths too
 WIN_PATH = re.compile(r'([A-Za-z]:\\Users\\)([^\\\s"\']+)', re.IGNORECASE)
 
@@ -54,6 +60,7 @@ SECRET_PATTERNS = [
     ("aws_access_key", re.compile(r'\bAKIA[0-9A-Z]{16}\b')),
     ("aws_secret", re.compile(r'\b(?i:aws_secret_access_key)\s*[=:]\s*["\']?[A-Za-z0-9/+=]{40}["\']?')),
     ("github_token", re.compile(r'\bgh[pousr]_[A-Za-z0-9]{36,}\b')),
+    ("hf_token", re.compile(r'\bhf_[A-Za-z0-9]{30,}\b')),
     ("openai_key", re.compile(r'\bsk-[A-Za-z0-9_\-]{20,}\b')),
     ("anthropic_key", re.compile(r'\bsk-ant-[A-Za-z0-9_\-]{20,}\b')),
     ("slack_token", re.compile(r'\bxox[baprs]-[A-Za-z0-9\-]{10,}\b')),
@@ -88,6 +95,11 @@ def redact_string(s, counts):
         return f"{m.group(1)}/USER"
     s = HOME_PATH.sub(_home, s)
 
+    def _home_dash(m):
+        counts["home_path"] += 1
+        return f"{m.group(1)}-USER"
+    s = HOME_PATH_DASH.sub(_home_dash, s)
+
     def _win(m):
         counts["home_path"] += 1
         return f"{m.group(1)}USER"
@@ -115,7 +127,12 @@ def walk(obj, counts):
     if isinstance(obj, list):
         return [walk(x, counts) for x in obj]
     if isinstance(obj, dict):
-        return {k: walk(v, counts) for k, v in obj.items()}
+        # Keys can carry leaks too — some agents key objects by absolute file
+        # path (e.g. {"/Users/<name>/proj/file": ...}), so scrub keys as well.
+        return {
+            (redact_string(k, counts) if isinstance(k, str) else k): walk(v, counts)
+            for k, v in obj.items()
+        }
     return obj
 
 
