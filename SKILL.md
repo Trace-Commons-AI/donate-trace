@@ -57,6 +57,20 @@ python scripts/scrub.py --in /tmp/donate-trace/<session-file> --harness <harness
 
 The scrubber writes the cleaned session and a JSON report listing every redaction it made.
 
+### Step 3.5 — Deep secret scan (if available)
+
+Run the optional deep scan over the cleaned file:
+
+```bash
+python scripts/scan.py --in /tmp/donate-trace/cleaned.jsonl --report /tmp/donate-trace/scan.json
+```
+
+This wraps TruffleHog (hundreds of maintained detectors) for breadth beyond the scrubber's pattern list. Read the `STATUS:` line:
+
+- **`trufflehog_not_installed`** — don't block and don't auto-install. Note it for the Step 5 summary so the user knows the deep scan didn't run locally. (The anonymous donation path runs it server-side; the attributed path does **not**, so for attributed donations either suggest installing TruffleHog with the one-liner the script prints, or proceed knowing only the pattern pass ran.)
+- **`findings`** — treat each as a **must-confirm item** in the review pass below: it may be a real secret the scrubber missed, or a false positive on a high-entropy string (hash, ID, base64). Resolve each with the user before uploading. These do not auto-block — TruffleHog runs without verification, so judgment is required.
+- **`clean`** / **`scan_error`** — proceed; mention a scan error in the summary if it occurred.
+
 ### Step 4 — Review pass (your judgment)
 
 The scrubber catches patterns; you catch meaning. Read the cleaned session and look for things a regex can't recognize:
@@ -82,11 +96,16 @@ Removed:
 - 2 email addresses
 - 1 company name in a commit message ("Acme")
 
+Deep scan: TruffleHog clean.   (or: "not installed — pattern pass only";
+or: "flagged 1 'Box' match, you confirmed it's a hash, not a secret")
+
 The cleaned session has 35 messages and 12 tool calls. Nothing has been
 uploaded yet. Want me to open the pull request?
 ```
 
-Wait for explicit confirmation. If the user wants to see the full cleaned file, show it. If they want to pull something else out, do it and re-summarize.
+Always include the **Deep scan** line so the user knows whether the deep scan
+actually ran — never let its absence be silent, especially for attributed
+donations, which get no server-side backstop. Wait for explicit confirmation. If the user wants to see the full cleaned file, show it. If they want to pull something else out, do it and re-summarize.
 
 ### Step 6 — Submit
 
