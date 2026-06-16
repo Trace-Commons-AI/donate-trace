@@ -13,25 +13,24 @@ The whole point is that contributing is safe and the user stays in control: noth
 
 These are not negotiable. The dataset is public and permanent, so a mistake here is published immediately.
 
-1. **Public repos only — and the contributor must have the right to share.** Never donate sessions from private, proprietary, work, or client repositories; if you cannot confirm the repo is public, stop and ask. The repo should also be openly licensed — but licensing is **best-effort and the contributor's call**: if the repo is public but has **no license** (which means all-rights-reserved by default), do not silently proceed and do not hard-stop either. Tell the contributor plainly, and let them decide knowing they're attesting they have the right to share (see Step 1).
+1. **The contributor certifies it's theirs to publish — you inform, they decide.** By choosing to donate, the contributor certifies that this session is not private or confidential and that they have the right to publish it publicly under CC-BY-4.0. Your job is to make that an *informed* certification, not to gatekeep: surface what you can actually see — a private-looking git remote, missing license, client/employer-looking code — so they decide with eyes open. Don't silently upload something that looks private; name what you see and let the contributor make the call. The responsibility for publishability and licensing rests with the contributor, not with you or the dataset. (Secret/PII scrubbing in the next steps is separate and still mandatory — see rule 2.)
 2. **Local cleaning before upload.** All anonymization happens on this machine, before anything is sent. Never upload a raw session.
 3. **User reviews before send.** Always show the user a summary of what was removed and ask for explicit confirmation. No silent uploads.
 4. **One session only.** Donate the single session the user chose, not their whole history.
-5. **If something looks wrong, stop.** If you're unsure whether a field is sensitive, redact it. If you're unsure whether the repo is public, ask. Dropping signal is acceptable; leaking is not.
+5. **When unsure about secrets, redact; when unsure about publishability, ask the contributor.** If you're unsure whether a field is a secret or personal data, redact it — dropping signal is acceptable, leaking is not. If you're unsure whether the project is public or theirs to share, surface it and let the contributor certify; that call is theirs, not yours.
 
 ## The flow
 
 Follow these steps in order.
 
-### Step 1 — Confirm it's open-source
+### Step 1 — Surface the source, let the contributor certify
 
-Before touching any logs, confirm the project the session came from is a public repository, and surface its license status so the contributor can make an informed call.
+Before touching any logs, look at where the session came from and surface anything that bears on whether it's the contributor's to publish — so their consent later is *informed*. You are not the gatekeeper; the contributor certifies. You just make sure they're not certifying blind.
 
-- If you can see the working directory, find the remote and check the license. Run `git -C <dir> remote get-url origin` (and `git -C <dir> config --get remote.origin.url`) to confirm it points at a public host, and look for a `LICENSE`/`LICENCE`/`COPYING` file or an SPDX/`license` field in the project manifest.
-- **Private/proprietary → hard stop.** If the repo isn't public, or is work/client code, stop here and explain why. This is non-negotiable.
-- **Public + openly licensed → proceed.** Note the license (e.g. MIT, Apache-2.0) so it can go in the summary.
-- **Public but no license found → inform, don't block.** Say plainly: "This repo is public but I don't see a license file, which means it's all-rights-reserved by default. Only donate it if you're the rights-holder (e.g. it's your own project) or you know it's openly licensed — by continuing you're attesting you have the right to share it." Then let the contributor decide. Don't hard-stop, and don't silently proceed.
-- Either way, confirm in plain language before continuing: "I'll donate this session to the public, CC-BY-4.0 Trace Commons dataset. Good to go?"
+- If you can see the working directory, check the remote and license: `git -C <dir> remote get-url origin` (and `git -C <dir> config --get remote.origin.url`), and look for a `LICENSE`/`LICENCE`/`COPYING` file or an SPDX/`license` field in the manifest.
+- **Tell the contributor what you found, plainly**, e.g.: "This is a public repo licensed MIT" / "This repo is public but has no license (all-rights-reserved by default)" / "I can't find a public remote — this looks like a local or private project." Don't refuse on your own; surface it.
+- **The one thing you don't do is silently upload something that looks private or like employer/client code.** Name it and let them decide. If they confirm it's theirs to publish, that's their certified call.
+- Then move to cleaning. The explicit publishability certification happens at the confirmation step (Step 5).
 
 ### Step 2 — Find the session
 
@@ -100,12 +99,21 @@ Deep scan: TruffleHog clean.   (or: "not installed — pattern pass only";
 or: "flagged 1 'Box' match, you confirmed it's a hash, not a secret")
 
 The cleaned session has 35 messages and 12 tool calls. Nothing has been
-uploaded yet. Want me to open the pull request?
+uploaded yet.
+
+By saying yes, you're certifying this session isn't private or confidential
+and that you have the right to publish it publicly under CC-BY-4.0. Open the
+pull request?
 ```
 
 Always include the **Deep scan** line so the user knows whether the deep scan
 actually ran — never let its absence be silent, especially for attributed
-donations, which get no server-side backstop. Wait for explicit confirmation. If the user wants to see the full cleaned file, show it. If they want to pull something else out, do it and re-summarize.
+donations, which get no server-side backstop.
+
+The confirmation **is the contributor's certification** that the content is
+theirs to publish — make that explicit (as above) and wait for an explicit yes.
+The responsibility for publishability rests with them; your job was to make the
+decision informed and to scrub secrets/PII, not to withhold the donation. If the user wants to see the full cleaned file, show it. If they want to pull something else out, do it and re-summarize.
 
 ### Step 6 — Submit
 
