@@ -84,7 +84,9 @@ SECRET_PATTERNS = [
     ("sendgrid_key", re.compile(r'\bSG\.[A-Za-z0-9_\-]{16,32}\.[A-Za-z0-9_\-]{16,64}\b')),
     ("npm_token", re.compile(r'\bnpm_[0-9A-Za-z]{36}\b')),
     ("pypi_token", re.compile(r'\bpypi-[A-Za-z0-9_\-]{16,}\b')),
-    ("twilio_key", re.compile(r'\bSK[0-9a-f]{32}\b')),
+    # Twilio (SK + 32 hex) is deliberately NOT regexed here: the shape collides
+    # with ordinary hashes/IDs and would cause false redactions. TruffleHog's
+    # validated Twilio detector handles it on the server backstop instead.
     ("azure_storage_key", re.compile(r'\bAccountKey=[A-Za-z0-9+/=]{40,}')),
     ("slack_webhook", re.compile(r'https://hooks\.slack\.com/services/[A-Za-z0-9/_\-]+')),
     ("discord_webhook", re.compile(r'https://(?:canary\.|ptb\.)?discord(?:app)?\.com/api/webhooks/[0-9]+/[A-Za-z0-9_\-]+')),
