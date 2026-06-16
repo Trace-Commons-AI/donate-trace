@@ -13,7 +13,7 @@ The whole point is that contributing is safe and the user stays in control: noth
 
 These are not negotiable. The dataset is public and permanent, so a mistake here is published immediately.
 
-1. **Open-source only.** Donate a session only if the project is a public, openly-licensed repository. If you cannot confirm the repo is public, stop and ask. Never donate sessions from private, proprietary, work, or client code. If the user can't confirm it's public and open-source, do not proceed.
+1. **Public repos only — and the contributor must have the right to share.** Never donate sessions from private, proprietary, work, or client repositories; if you cannot confirm the repo is public, stop and ask. The repo should also be openly licensed — but licensing is **best-effort and the contributor's call**: if the repo is public but has **no license** (which means all-rights-reserved by default), do not silently proceed and do not hard-stop either. Tell the contributor plainly, and let them decide knowing they're attesting they have the right to share (see Step 1).
 2. **Local cleaning before upload.** All anonymization happens on this machine, before anything is sent. Never upload a raw session.
 3. **User reviews before send.** Always show the user a summary of what was removed and ask for explicit confirmation. No silent uploads.
 4. **One session only.** Donate the single session the user chose, not their whole history.
@@ -25,11 +25,13 @@ Follow these steps in order.
 
 ### Step 1 — Confirm it's open-source
 
-Before touching any logs, confirm the project the session came from is a public, open-source repository.
+Before touching any logs, confirm the project the session came from is a public repository, and surface its license status so the contributor can make an informed call.
 
-- If you can see the working directory, check whether it has a git remote pointing at a public host and an open-source license. Run `git -C <dir> remote get-url origin` and `git -C <dir> config --get remote.origin.url` to find the remote, and look for a LICENSE file.
-- Even if it looks public, ask the user to confirm in plain language: "I'll donate this session to the public Trace Commons dataset. Can you confirm this project is open-source and public? I won't proceed otherwise."
-- If they can't confirm, stop here and explain why.
+- If you can see the working directory, find the remote and check the license. Run `git -C <dir> remote get-url origin` (and `git -C <dir> config --get remote.origin.url`) to confirm it points at a public host, and look for a `LICENSE`/`LICENCE`/`COPYING` file or an SPDX/`license` field in the project manifest.
+- **Private/proprietary → hard stop.** If the repo isn't public, or is work/client code, stop here and explain why. This is non-negotiable.
+- **Public + openly licensed → proceed.** Note the license (e.g. MIT, Apache-2.0) so it can go in the summary.
+- **Public but no license found → inform, don't block.** Say plainly: "This repo is public but I don't see a license file, which means it's all-rights-reserved by default. Only donate it if you're the rights-holder (e.g. it's your own project) or you know it's openly licensed — by continuing you're attesting you have the right to share it." Then let the contributor decide. Don't hard-stop, and don't silently proceed.
+- Either way, confirm in plain language before continuing: "I'll donate this session to the public, CC-BY-4.0 Trace Commons dataset. Good to go?"
 
 ### Step 2 — Find the session
 
