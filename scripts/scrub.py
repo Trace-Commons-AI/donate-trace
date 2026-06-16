@@ -8,10 +8,14 @@ session before it is reviewed and donated:
   - common secret formats (API keys, tokens, PEM blocks, JWTs, env assignments)
   - email addresses
 
-This is intentionally NOT the whole anonymization story. Fuzzy things
-(personal names in prose, company names, internal codenames) are left to the
-review pass that the skill performs afterwards. The split is deliberate:
-code handles the patterns that have signatures; a human/LLM handles meaning.
+This is intentionally NOT the whole anonymization story, and the secret list
+here is a fast first pass, not the authoritative one. Three layers back it up:
+the ingestion server re-runs TruffleHog (hundreds of maintained, updated secret
+detectors) and rejects anything it flags; the skill performs an LLM/human review
+pass for fuzzy things a regex can't recognize (personal names in prose, company
+names, internal codenames); and the contributor reviews the exact diff before
+anything is uploaded. The split is deliberate: code handles the patterns that
+have signatures, a dedicated scanner handles breadth, and a human handles meaning.
 
 The script walks the parsed JSON of each session line and rewrites string
 values in place, so it works regardless of where in the structure a string
@@ -69,6 +73,21 @@ SECRET_PATTERNS = [
     ("private_key_block", re.compile(r'-----BEGIN (?:RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY-----.*?-----END (?:RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY-----', re.DOTALL)),
     ("bearer_token", re.compile(r'\b(?i:bearer)\s+[A-Za-z0-9_\-\.=]{20,}')),
     ("connection_string", re.compile(r'\b(?:postgres|postgresql|mysql|mongodb(?:\+srv)?|redis|amqp)://[^\s"\'<>]+:[^\s"\'<>@]+@[^\s"\'<>]+')),
+    # More vendor-prefixed tokens. This list is necessarily incomplete — it is a
+    # fast first pass, NOT the authoritative check. The ingestion server runs
+    # TruffleHog (hundreds of maintained detectors) as the real backstop and
+    # rejects anything it flags. Keep these prefix-anchored to avoid false hits.
+    ("github_fine_grained_pat", re.compile(r'\bgithub_pat_[0-9A-Za-z_]{22,}\b')),
+    ("gitlab_pat", re.compile(r'\bglpat-[0-9A-Za-z_\-]{20,}\b')),
+    ("gcp_oauth_token", re.compile(r'\bya29\.[0-9A-Za-z_\-]{20,}\b')),
+    ("stripe_key", re.compile(r'\b(?:sk|rk)_(?:live|test)_[0-9A-Za-z]{20,}\b')),
+    ("sendgrid_key", re.compile(r'\bSG\.[A-Za-z0-9_\-]{16,32}\.[A-Za-z0-9_\-]{16,64}\b')),
+    ("npm_token", re.compile(r'\bnpm_[0-9A-Za-z]{36}\b')),
+    ("pypi_token", re.compile(r'\bpypi-[A-Za-z0-9_\-]{16,}\b')),
+    ("twilio_key", re.compile(r'\bSK[0-9a-f]{32}\b')),
+    ("azure_storage_key", re.compile(r'\bAccountKey=[A-Za-z0-9+/=]{40,}')),
+    ("slack_webhook", re.compile(r'https://hooks\.slack\.com/services/[A-Za-z0-9/_\-]+')),
+    ("discord_webhook", re.compile(r'https://(?:canary\.|ptb\.)?discord(?:app)?\.com/api/webhooks/[0-9]+/[A-Za-z0-9_\-]+')),
     # generic KEY=secret env assignments where the value looks secret-ish
     ("env_secret", re.compile(r'\b([A-Z][A-Z0-9_]*(?:KEY|TOKEN|SECRET|PASSWORD|PASSWD|PWD|CREDENTIAL|API)[A-Z0-9_]*)\s*=\s*["\']?([^\s"\']{8,})["\']?')),
 ]
